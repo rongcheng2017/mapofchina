@@ -1,8 +1,6 @@
 library map;
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import 'data.dart';
@@ -12,11 +10,13 @@ class MapEntity {
   late String name;
   late Path path;
   late bool isSelected;
+  Color color = Colors.white;
 }
 
 //中国地图控件
 class MapWidget extends StatefulWidget {
-  const MapWidget({Key? key}) : super(key: key);
+  final List<CityItem> cityItems;
+  const MapWidget({Key? key, required this.cityItems}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -25,9 +25,6 @@ class MapWidget extends StatefulWidget {
 }
 
 class _MapState extends State<MapWidget> with AutomaticKeepAliveClientMixin {
-  
-
-
   /// 计算地图边界
   /// 1.黑龙江是中国最东，最北的省份
   /// 2.新疆是中国最西的省份
@@ -58,7 +55,7 @@ class _MapState extends State<MapWidget> with AutomaticKeepAliveClientMixin {
   double _lastEndMapScale = 1.0;
   double _lastMapScale = 1.0;
   double _nowMapScale = 1.0;
-  List<String> _cityNameList=[];
+  List<CityItem> _cityNameList = [];
 
   List<Widget> cityNameListWidget = [];
   final List<MapEntity> _mapEntityList = [];
@@ -72,7 +69,8 @@ class _MapState extends State<MapWidget> with AutomaticKeepAliveClientMixin {
   //根据svgPaths 初始化
   void _initMapData() {
     _mapEntityList.clear();
-    _cityNameList=cityName.split(",");
+    _cityNameList =
+        widget.cityItems.isEmpty ? mockCityItems():widget.cityItems  ;
     for (int svgPathListIndex = 0;
         svgPathListIndex < svgPathList.length;
         svgPathListIndex++) {
@@ -88,8 +86,8 @@ class _MapState extends State<MapWidget> with AutomaticKeepAliveClientMixin {
         }
         svgIndex++;
       }
-      double lastPointX=0.0;
-      double lastPointY=0.0;
+      double lastPointX = 0.0;
+      double lastPointY = 0.0;
       for (int i = 0; i < cmdPositionList.length; i++) {
         int cmdIndex = cmdPositionList[i];
         String pointString;
@@ -201,21 +199,21 @@ class _MapState extends State<MapWidget> with AutomaticKeepAliveClientMixin {
       }
 
       _mapEntityList.add(MapEntity()
+        ..color = _cityNameList[svgPathListIndex].cityColor
         ..path = paintPath
         ..isSelected = false
-        ..name = _cityNameList[svgPathListIndex]);
+        ..name = _cityNameList[svgPathListIndex].cityName);
 
       //最下方城市
-      if (_cityNameList[svgPathListIndex] == "海南") {
+      if (_cityNameList[svgPathListIndex].cityName == "海南") {
         _mapHeight = paintPath.getBounds().bottom;
       }
 
       //最右方城市
-      if (_cityNameList[svgPathListIndex] == "黑龙江") {
+      if (_cityNameList[svgPathListIndex].cityName == "黑龙江") {
         _mapWidth = paintPath.getBounds().right;
       }
     }
-
   }
 
   //处理点击事件
@@ -314,8 +312,6 @@ class _MapState extends State<MapWidget> with AutomaticKeepAliveClientMixin {
         ));
   }
 
-
-
   List<Widget> _cityNameListWidget() {
     cityNameListWidget.clear();
     for (var element in _mapEntityList) {
@@ -402,12 +398,15 @@ class _MapState extends State<MapWidget> with AutomaticKeepAliveClientMixin {
 }
 
 class MapPainter extends CustomPainter {
-  Paint mapPaint = Paint()
+  Paint storkePaint = Paint()
     ..color = const Color(0xFF333333)
     ..isAntiAlias = true
     ..strokeWidth = 1;
-  double offsetX=0.0;
-  double offsetY=0.0;
+  Paint fillPaint = Paint()
+    ..isAntiAlias = true
+    ..strokeWidth = 1;
+  double offsetX = 0.0;
+  double offsetY = 0.0;
   double scale;
   List<MapEntity> mapEntityList;
 
@@ -422,16 +421,19 @@ class MapPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     canvas.translate(offsetX, offsetY);
     canvas.scale(scale);
-    mapEntityList.forEach((mapEntity) {
-      if (mapEntity.isSelected) {
-        mapPaint.color = const Color(0xFF22d7bb);
-        mapPaint.style = PaintingStyle.fill;
-      } else {
-        mapPaint.color = const Color(0xFF333333);
-        mapPaint.style = PaintingStyle.stroke;
-      }
-      canvas.drawPath(mapEntity.path, mapPaint);
-    });
+    for (var mapEntity in mapEntityList) {
+      // if (mapEntity.isSelected) {
+      fillPaint.color = mapEntity.color;
+      fillPaint.style = PaintingStyle.fill;
+      // fillPaint.color = mapEntity.color;
+      // fillPaint.style = PaintingStyle.fill;
+      // } else {
+      // mapPaint.color =  Colors.white;
+      // mapPaint.style = PaintingStyle.stroke;
+      // }
+      canvas.drawPath(mapEntity.path, storkePaint);
+      canvas.drawPath(mapEntity.path, fillPaint);
+    }
   }
 
   @override
@@ -439,5 +441,3 @@ class MapPainter extends CustomPainter {
     return true;
   }
 }
-
-
