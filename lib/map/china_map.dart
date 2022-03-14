@@ -1,7 +1,7 @@
 library map;
 
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:mapofchina/map/intefaces.dart';
 
 import 'data.dart';
 
@@ -16,7 +16,9 @@ class MapEntity {
 //中国地图控件
 class MapWidget extends StatefulWidget {
   final List<CityItem> cityItems;
-  const MapWidget({Key? key, required this.cityItems}) : super(key: key);
+  final ClickCallback? clickCallback;
+  const MapWidget({Key? key, required this.cityItems, this.clickCallback})
+      : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -70,7 +72,7 @@ class _MapState extends State<MapWidget> with AutomaticKeepAliveClientMixin {
   void _initMapData() {
     _mapEntityList.clear();
     _cityNameList =
-        widget.cityItems.isEmpty ? mockCityItems():widget.cityItems  ;
+        widget.cityItems.isEmpty ? mockCityItems() : widget.cityItems;
     for (int svgPathListIndex = 0;
         svgPathListIndex < svgPathList.length;
         svgPathListIndex++) {
@@ -224,7 +226,7 @@ class _MapState extends State<MapWidget> with AutomaticKeepAliveClientMixin {
           (details.localPosition.dx - _mapOffsetX) / _mapScale,
           (details.localPosition.dy - _mapOffsetY) / _mapScale))) {
         mapEntity.isSelected = true;
-        Fluttertoast.showToast(msg: mapEntity.name);
+        widget.clickCallback?.call(mapEntity.name);
       } else {
         mapEntity.isSelected = false;
       }

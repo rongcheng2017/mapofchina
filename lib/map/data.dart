@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mapofchina/map/intefaces.dart';
 
 //最深的颜色
 const Color depthColor = Color(0xFF2478ED);
@@ -97,7 +98,7 @@ List<CityItem> mockCityItems() {
   return list;
 }
 
-typedef CityCallback = CityItem Function(String cityName);
+
 List<CityItem> generatedCityItemsHelper(CityCallback callback) {
   List<CityItem> list = [];
   var cityNames = cityName.split(",");
