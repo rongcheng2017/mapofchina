@@ -17,7 +17,12 @@ class MapEntity {
 class MapWidget extends StatefulWidget {
   final List<CityItem> cityItems;
   final ClickCallback? clickCallback;
-  const MapWidget({Key? key, required this.cityItems, this.clickCallback})
+  final Color selectedStorkeColor;
+  const MapWidget(
+      {Key? key,
+      required this.cityItems,
+      this.clickCallback,
+      this.selectedStorkeColor = Colors.white})
       : super(key: key);
 
   @override
@@ -199,12 +204,12 @@ class _MapState extends State<MapWidget> with AutomaticKeepAliveClientMixin {
             break;
         }
       }
-
+      var _cityItem = _cityNameList[svgPathListIndex];
       _mapEntityList.add(MapEntity()
-        ..color = _cityNameList[svgPathListIndex].cityColor
+        ..color = _cityItem.cityColor
         ..path = paintPath
-        ..isSelected = false
-        ..name = _cityNameList[svgPathListIndex].cityName);
+        ..isSelected = _cityItem.isSelected
+        ..name = _cityItem.cityName);
 
       //最下方城市
       if (_cityNameList[svgPathListIndex].cityName == "海南") {
@@ -305,7 +310,8 @@ class _MapState extends State<MapWidget> with AutomaticKeepAliveClientMixin {
                   offsetX: _mapOffsetX,
                   offsetY: _mapOffsetY,
                   scale: _mapScale,
-                  mapEntityList: _mapEntityList),
+                  mapEntityList: _mapEntityList,
+                  selectedStorkeColor: widget.selectedStorkeColor),
               child: Stack(
                 children: _cityNameListWidget(),
               ),
@@ -400,23 +406,26 @@ class _MapState extends State<MapWidget> with AutomaticKeepAliveClientMixin {
 }
 
 class MapPainter extends CustomPainter {
-  Paint storkePaint = Paint()
-    ..color = const Color(0xFF333333)
-    ..isAntiAlias = true
-    ..strokeWidth = 1;
-  Paint fillPaint = Paint()
-    ..isAntiAlias = true
-    ..strokeWidth = 1;
   double offsetX = 0.0;
   double offsetY = 0.0;
   double scale;
   List<MapEntity> mapEntityList;
-
+  Color selectedStorkeColor;
+  int storkeWidth;
+  Paint storkePaint = Paint()
+    ..color = Colors.white
+    ..isAntiAlias = true
+    ..strokeWidth = 3;
+  Paint fillPaint = Paint()
+    ..isAntiAlias = true
+    ..strokeWidth = 1;
   MapPainter({
     required this.offsetX,
     required this.offsetY,
     required this.mapEntityList,
     required this.scale,
+    this.selectedStorkeColor = Colors.white,
+    this.storkeWidth = 1,
   });
 
   @override
@@ -424,7 +433,11 @@ class MapPainter extends CustomPainter {
     canvas.translate(offsetX, offsetY);
     canvas.scale(scale);
     for (var mapEntity in mapEntityList) {
-      // if (mapEntity.isSelected) {
+      if (mapEntity.isSelected) {
+        storkePaint.color = selectedStorkeColor;
+      }else{
+         storkePaint.color = Colors.white;
+      }
       fillPaint.color = mapEntity.color;
       fillPaint.style = PaintingStyle.fill;
       // fillPaint.color = mapEntity.color;
@@ -433,8 +446,9 @@ class MapPainter extends CustomPainter {
       // mapPaint.color =  Colors.white;
       // mapPaint.style = PaintingStyle.stroke;
       // }
-      canvas.drawPath(mapEntity.path, storkePaint);
+     
       canvas.drawPath(mapEntity.path, fillPaint);
+       canvas.drawPath(mapEntity.path, storkePaint);
     }
   }
 

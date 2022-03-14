@@ -85,7 +85,11 @@ List<String> svgPathList = [
 class CityItem {
   final Color cityColor;
   final String cityName;
-  CityItem({this.cityColor = shallowColor, required this.cityName});
+  final bool isSelected;
+  CityItem(
+      {this.cityColor = shallowColor,
+      required this.cityName,
+      this.isSelected = false});
 }
 
 List<CityItem> mockCityItems() {
@@ -97,7 +101,6 @@ List<CityItem> mockCityItems() {
   }
   return list;
 }
-
 
 List<CityItem> generatedCityItemsHelper(CityCallback callback) {
   List<CityItem> list = [];
