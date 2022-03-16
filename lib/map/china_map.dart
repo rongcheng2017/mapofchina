@@ -1,9 +1,9 @@
 library map;
 
 import 'package:flutter/material.dart';
-import 'package:mapofchina/map/intefaces.dart';
 
 import 'data.dart';
+import 'intefaces.dart';
 
 //封装地图实体类
 class MapEntity {
@@ -18,11 +18,16 @@ class MapWidget extends StatefulWidget {
   final List<CityItem> cityItems;
   final ClickCallback? clickCallback;
   final Color selectedStorkeColor;
+  final Color background;
+  //提示语，选择省后的提示，通过click由使用者返回[ClickCallback]
+  final String defaultToast;
   const MapWidget(
       {Key? key,
       required this.cityItems,
       this.clickCallback,
-      this.selectedStorkeColor = Colors.white})
+      this.selectedStorkeColor = Colors.white,
+      this.background = const Color(0xFFF2F2F2),
+      this.defaultToast = ""})
       : super(key: key);
 
   @override
@@ -66,10 +71,11 @@ class _MapState extends State<MapWidget> with AutomaticKeepAliveClientMixin {
 
   List<Widget> cityNameListWidget = [];
   final List<MapEntity> _mapEntityList = [];
-
+  late String _toastString;
   @override
   void initState() {
     super.initState();
+    _toastString = widget.defaultToast;
     _initMapData();
   }
 
@@ -225,18 +231,21 @@ class _MapState extends State<MapWidget> with AutomaticKeepAliveClientMixin {
 
   //处理点击事件
   void _dealClickEvent(TapUpDetails details) {
+    var inMap = false;
     //寻找点击范围的城市
     for (var mapEntity in _mapEntityList) {
       if (mapEntity.path.contains(Offset(
           (details.localPosition.dx - _mapOffsetX) / _mapScale,
           (details.localPosition.dy - _mapOffsetY) / _mapScale))) {
         mapEntity.isSelected = true;
-        widget.clickCallback?.call(mapEntity.name);
+        _toastString = widget.clickCallback?.call(mapEntity.name) ?? "";
+        inMap = true;
       } else {
         mapEntity.isSelected = false;
       }
     }
-    setState(() {});
+    //如果点击的不是城市，没必要刷新
+    if (inMap) setState(() {});
   }
 
   //处理地图移动、缩放事件
@@ -301,7 +310,7 @@ class _MapState extends State<MapWidget> with AutomaticKeepAliveClientMixin {
           _dealScaleEndEvent();
         },
         child: Container(
-          color: const Color(0xFFF2F2F2),
+          color: widget.background,
           width: _mapWidth,
           height: _mapHeight,
           child: ClipRect(
@@ -379,6 +388,23 @@ class _MapState extends State<MapWidget> with AutomaticKeepAliveClientMixin {
         ),
       ));
     }
+    //添加提示语
+    cityNameListWidget.add(
+      Positioned(
+        left: 5,
+        top: 5,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(2),
+              color: const Color(0xFF2E2F30)),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(5, 3, 5, 3),
+            child: Text(_toastString,
+                style: const TextStyle(fontSize: 13, color: Colors.white)),
+          ),
+        ),
+      ),
+    );
     return cityNameListWidget;
   }
 
@@ -401,7 +427,6 @@ class _MapState extends State<MapWidget> with AutomaticKeepAliveClientMixin {
   }
 
   @override
-  // TODO: implement wantKeepAlive
   bool get wantKeepAlive => false;
 }
 
@@ -414,11 +439,10 @@ class MapPainter extends CustomPainter {
   int storkeWidth;
   Paint storkePaint = Paint()
     ..color = Colors.white
-    ..isAntiAlias = true
-    ..strokeWidth = 3;
-  Paint fillPaint = Paint()
+    ..style = PaintingStyle.stroke
     ..isAntiAlias = true
     ..strokeWidth = 1;
+  Paint fillPaint = Paint()..isAntiAlias = true;
   MapPainter({
     required this.offsetX,
     required this.offsetY,
@@ -434,9 +458,9 @@ class MapPainter extends CustomPainter {
     canvas.scale(scale);
     for (var mapEntity in mapEntityList) {
       if (mapEntity.isSelected) {
-        storkePaint.color = selectedStorkeColor;
-      }else{
-         storkePaint.color = Colors.white;
+        //   storkePaint.color = selectedStorkeColor;
+        // } else {
+        //   storkePaint.color = Colors.white;
       }
       fillPaint.color = mapEntity.color;
       fillPaint.style = PaintingStyle.fill;
@@ -446,9 +470,9 @@ class MapPainter extends CustomPainter {
       // mapPaint.color =  Colors.white;
       // mapPaint.style = PaintingStyle.stroke;
       // }
-     
+
       canvas.drawPath(mapEntity.path, fillPaint);
-       canvas.drawPath(mapEntity.path, storkePaint);
+      canvas.drawPath(mapEntity.path, storkePaint);
     }
   }
 

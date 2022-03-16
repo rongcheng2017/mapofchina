@@ -1,6 +1,6 @@
 name: mapofchina
 description: A new Flutter package for china map.
-version: 0.0.1
+version: 0.0.4
 homepage: https://github.com/rongcheng2017/mapofchina
 
 environment:
@@ -10,6 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+
  
 
 dev_dependencies:

@@ -1,5 +1,6 @@
-import 'package:mapofchina/map/data.dart';
+
+import 'data.dart';
 
 typedef CityCallback = CityItem Function(String cityName);
 
-typedef ClickCallback = void Function(String cityName);
+typedef ClickCallback = String? Function(String cityName);

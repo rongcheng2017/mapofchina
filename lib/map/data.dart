@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:mapofchina/map/intefaces.dart';
+
+import 'intefaces.dart';
 
 //最深的颜色
 const Color depthColor = Color(0xFF2478ED);
