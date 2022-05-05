@@ -377,6 +377,9 @@ class _MapState extends State<MapWidget> with AutomaticKeepAliveClientMixin {
         offsetX += 18 * _mapScale;
       } else if (element.name == "广东") {
         offsetY -= 6 * _mapScale;
+      } else if (element.name == "内蒙古") {
+        offsetY += 25 * _mapScale;
+        offsetX += 22 * _mapScale;
       }
 
       cityNameListWidget.add(Positioned(

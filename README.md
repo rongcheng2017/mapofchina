@@ -62,7 +62,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                 cityName: cityName,
                 cityColor: _randomColor(),
                 isSelected: cityName == ("山西") ? true : false,
-              )),
+              )),   
           //省份被点击的回调，传回去的String是用来更新提示语的。
           clickCallback: (cityName) {
             return "$cityName baby";
